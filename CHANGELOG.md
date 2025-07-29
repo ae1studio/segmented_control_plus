@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0
+
+- Added `showSubtitle` option to show the tooltip under the selector.
+
 ## 0.1.0
 
 - **Breaking Change:** Segment model is now SegmentIcon or SegmentIconBuilder.

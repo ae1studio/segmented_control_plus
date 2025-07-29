@@ -24,6 +24,12 @@ class SegmentedControl<T> extends StatelessWidget {
   /// Background color of the control
   final Color? backgroundColor;
 
+  /// Shows a subtitle with the segment tooltip text
+  final bool showSubtitle;
+
+  /// TextStyle of the subtitle
+  final TextStyle? subtitleTextStyle;
+
   const SegmentedControl({
     super.key,
     required this.segments,
@@ -32,6 +38,8 @@ class SegmentedControl<T> extends StatelessWidget {
     this.backgroundColor,
     this.selectedColor,
     this.selectedValue,
+    this.showSubtitle = false,
+    this.subtitleTextStyle,
   }) : assert(segments.length != 0, 'Segments must not be empty');
 
   BorderRadius? _getBorderRadius(int index) {
@@ -66,47 +74,65 @@ class SegmentedControl<T> extends StatelessWidget {
     return backgroundColor ?? Theme.of(context).cardColor;
   }
 
+  String? _getSegmentToolTip() {
+    return segments.firstWhere((e) => e.value == selectedValue).tooltip;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      borderRadius: BorderRadius.circular(borderRadius),
-      color: backgroundColor ?? Theme.of(context).cardColor,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: Row(
-          children: List.generate(
-            segments.length,
-            (int index) {
-              Color segmentColor =
-                  _segmentBackgroundColor(segments[index].value, context);
-              return InkWell(
-                onTap: () => onTap(segments[index].value),
-                borderRadius: _getBorderRadius(index),
-                child: Tooltip(
-                  message: segments[index].tooltip,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: segmentColor,
-                      borderRadius: _getBorderRadius(index),
-                      border: !_isBorder(index)
-                          ? Border.symmetric(
-                              vertical: BorderSide(
-                                color: Theme.of(context).dividerColor,
-                              ),
-                            )
-                          : null,
+    return Column(
+      children: [
+        Material(
+          borderRadius: BorderRadius.circular(borderRadius),
+          color: backgroundColor ?? Theme.of(context).cardColor,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: Row(
+              children: List.generate(
+                segments.length,
+                (int index) {
+                  Color segmentColor =
+                      _segmentBackgroundColor(segments[index].value, context);
+                  return InkWell(
+                    onTap: () => onTap(segments[index].value),
+                    borderRadius: _getBorderRadius(index),
+                    child: Tooltip(
+                      message: segments[index].tooltip,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 6, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: segmentColor,
+                          borderRadius: _getBorderRadius(index),
+                          border: !_isBorder(index)
+                              ? Border.symmetric(
+                                  vertical: BorderSide(
+                                    color: Theme.of(context).dividerColor,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        child: _buildIconWidget(
+                            segments[index], segmentColor, context),
+                      ),
                     ),
-                    child:
-                        _buildIconWidget(segments[index], segmentColor, context),
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           ),
         ),
-      ),
+        //Show subtitle
+        if (showSubtitle && _getSegmentToolTip() != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Text(
+              _getSegmentToolTip()!,
+              style:
+                  subtitleTextStyle ?? Theme.of(context).textTheme.labelMedium,
+            ),
+          ),
+      ],
     );
   }
 
